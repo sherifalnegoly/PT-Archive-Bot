@@ -204,43 +204,43 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ==========================
     elif data.startswith("material_"):
 
-     material_id = int(data.replace("material_", ""))
+        material_id = int(data.replace("material_", ""))
 
-    material = get_material_by_id(material_id)
+        material = get_material_by_id(material_id)
 
-    if not material:
-        await query.message.reply_text(
-            "Material not found."
-        )
-        return
+        if not material:
+            await query.message.reply_text(
+                "Material not found."
+            )
+            return
 
-    material_type = material[2]
-    title = material[3]
-    file_id = material[4]
+        material_type = material[2]
+        title = material[3]
+        file_id = material[4]
 
-    if not file_id:
-        await query.message.reply_text(
-            "File not found."
-        )
-        return
+        if not file_id:
+            await query.message.reply_text(
+                "File not found."
+            )
+            return
 
-    if material_type == "lecture":
+        if material_type == "lecture":
 
-        await query.message.reply_document(
-            document=file_id,
-            caption=title
-        )
+            await query.message.reply_document(
+                document=file_id,
+                caption=title
+            )
 
-    elif material_type == "assignment":
+        elif material_type == "assignment":
 
-        await query.message.reply_document(
-            document=file_id,
-            caption=title
-        )
+            await query.message.reply_document(
+                document=file_id,
+                caption=title
+            )
 
-    elif material_type == "record":
+        elif material_type == "record":
 
-        await query.message.reply_video(
-            video=file_id,
-            caption=title
-        )
+            await query.message.reply_video(
+                video=file_id,
+                caption=title
+            )
