@@ -35,7 +35,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     data = query.data
-
+    if data.startswith("admin_") or data in ["add_lecture", "add_record", "add_assignment"]:
+        return
     # ==========================
     # Choose Year
     # ==========================

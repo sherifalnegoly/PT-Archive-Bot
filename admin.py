@@ -14,7 +14,6 @@ CHOOSE_YEAR, CHOOSE_SUBJECT, RECEIVE_FILE, RECEIVE_TITLE = range(4)
 
 
 async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_text("Not allowed")
         return
@@ -32,35 +31,21 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ==========================
-# Start Lecture
+# Start Handlers
 # ==========================
 
 async def start_add_lecture(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     context.user_data["material_type"] = "lecture"
-
     return await start_add_material(update, context)
 
-
-# ==========================
-# Start Record
-# ==========================
 
 async def start_add_record(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     context.user_data["material_type"] = "record"
-
     return await start_add_material(update, context)
 
 
-# ==========================
-# Start Assignment
-# ==========================
-
 async def start_add_assignment(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     context.user_data["material_type"] = "assignment"
-
     return await start_add_material(update, context)
 
 
@@ -69,52 +54,48 @@ async def start_add_assignment(update: Update, context: ContextTypes.DEFAULT_TYP
 # ==========================
 
 async def start_add_material(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     query = update.callback_query
     await query.answer()
 
     years = get_years()
-
     keyboard = []
 
     for yid, yname in years:
         keyboard.append([
             InlineKeyboardButton(
                 yname,
-                callback_data=f"year_{yid}"
+                callback_data=f"admin_year_{yid}" 
             )
         ])
 
     await query.message.reply_text(
-        "Choose Year:",
+        "Choose Year (Admin Mode):",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
     return CHOOSE_YEAR
 
-async def choose_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+async def choose_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    year_id = int(query.data.replace("year_", ""))
-
+    year_id = int(query.data.replace("admin_year_", ""))
     context.user_data["year_id"] = year_id
 
     subjects = get_subjects_by_year(year_id)
-
     keyboard = []
 
     for sid, name in subjects:
         keyboard.append([
             InlineKeyboardButton(
                 name,
-                callback_data=f"subject_{sid}"
+                callback_data=f"admin_subject_{sid}"
             )
         ])
 
     await query.message.reply_text(
-        "Choose Subject:",
+        "Choose Subject (Admin Mode):",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -122,12 +103,10 @@ async def choose_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def choose_subject(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     query = update.callback_query
     await query.answer()
 
-    subject_id = int(query.data.replace("subject_", ""))
-
+    subject_id = int(query.data.replace("admin_subject_", ""))
     context.user_data["subject_id"] = subject_id
 
     material_type = context.user_data["material_type"]
@@ -141,38 +120,29 @@ async def choose_subject(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     material_type = context.user_data["material_type"]
 
     if material_type == "record":
-
         if update.message.video:
             file_id = update.message.video.file_id
-
         elif update.message.document:
             file_id = update.message.document.file_id
-
         else:
             await update.message.reply_text("Please send a video.")
             return RECEIVE_FILE
-
     else:
-
         if not update.message.document:
             await update.message.reply_text("Please send a PDF.")
             return RECEIVE_FILE
-
         file_id = update.message.document.file_id
 
     context.user_data["file_id"] = file_id
-
     await update.message.reply_text("Send Title")
 
     return RECEIVE_TITLE
 
 
 async def receive_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     title = update.message.text
 
     add_material(
@@ -183,64 +153,36 @@ async def receive_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text("✅ Saved Successfully")
-
     context.user_data.clear()
 
     return ConversationHandler.END
 
 
 admin_handler = ConversationHandler(
-
     entry_points=[
-
-        CallbackQueryHandler(
-            start_add_lecture,
-            pattern="^add_lecture$"
-        ),
-
-        CallbackQueryHandler(
-            start_add_record,
-            pattern="^add_record$"
-        ),
-
-        CallbackQueryHandler(
-            start_add_assignment,
-            pattern="^add_assignment$"
-        ),
-
+        CallbackQueryHandler(start_add_lecture, pattern="^add_lecture$"),
+        CallbackQueryHandler(start_add_record, pattern="^add_record$"),
+        CallbackQueryHandler(start_add_assignment, pattern="^add_assignment$"),
     ],
-
     states={
-
         CHOOSE_YEAR: [
-            CallbackQueryHandler(
-                choose_year,
-                pattern="^year_"
-            )
+            CallbackQueryHandler(choose_year, pattern="^admin_year_")
         ],
-
         CHOOSE_SUBJECT: [
-            CallbackQueryHandler(
-                choose_subject,
-                pattern="^subject_"
-            )
+            CallbackQueryHandler(choose_subject, pattern="^admin_subject_")
         ],
-
         RECEIVE_FILE: [
             MessageHandler(
                 filters.Document.ALL | filters.VIDEO,
                 receive_file
             )
         ],
-
         RECEIVE_TITLE: [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
                 receive_title
             )
         ],
-
     },
-
     fallbacks=[],
 )
