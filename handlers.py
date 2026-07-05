@@ -37,8 +37,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     # تجاهل الأدمن
-    if data.startswith("admin_") or data in ["add_lecture", "add_record", "add_assignment"]:
-        return
+    if data.startswith("admin_") or data.startswith("add_"):
+      return
 
     # ==========================
     # YEARS
@@ -148,8 +148,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    # ==========================
-    # OPEN MATERIAL (IMPORTANT FIX)
+        # ==========================
+    # OPEN MATERIAL
     # ==========================
     elif data.startswith("material_"):
 
@@ -169,18 +169,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text("File not found.")
             return
 
-        # ==========================
-        # SEND FILES
-        # ==========================
-        if material_type == "lecture" or material_type == "assignment":
-
+        if material_type in ["lecture", "assignment"]:
             await query.message.reply_document(
                 document=file_id,
                 caption=title
             )
 
         elif material_type == "record":
-
             await query.message.reply_video(
                 video=file_id,
                 caption=title

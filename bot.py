@@ -14,8 +14,8 @@ app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("admin", admin_panel))
 
-app.add_handler(admin_handler)
-app.add_handler(CallbackQueryHandler(button_handler))
+app.add_handler(admin_handler, group=0)
+app.add_handler(CallbackQueryHandler(button_handler), group=1)
 
 print("Bot is running...")
 app.run_polling()
