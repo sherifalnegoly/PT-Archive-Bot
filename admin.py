@@ -159,6 +159,7 @@ async def receive_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 admin_handler = ConversationHandler(
+    per_message=True,
     entry_points=[
         CallbackQueryHandler(start_add_lecture, pattern="^add_lecture$"),
         CallbackQueryHandler(start_add_record, pattern="^add_record$"),
